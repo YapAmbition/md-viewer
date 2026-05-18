@@ -5,6 +5,7 @@ const Tree = (() => {
   let currentSort = 'name'; // 'name' or 'time'
   let currentDir = 'asc'; // 'asc' or 'desc'
   let containerEl = null;
+  let currentFilter = '';
 
   const ICONS = {
     folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
@@ -36,8 +37,34 @@ const Tree = (() => {
     currentData = treeData;
     container.innerHTML = '';
     const sorted = sortTree(treeData);
-    const ul = buildList(sorted.children);
+    const filtered = currentFilter ? filterTree(sorted, currentFilter) : sorted;
+    if (filtered.children.length === 0 && currentFilter) {
+      container.innerHTML = '<div class="search-empty">No matching files</div>';
+      return;
+    }
+    const ul = buildList(filtered.children);
     container.appendChild(ul);
+  }
+
+  function filterTree(node, query) {
+    if (node.type === 'file') {
+      const match = node.name.toLowerCase().includes(query.toLowerCase());
+      return match ? node : null;
+    }
+    const children = node.children
+      .map(child => filterTree(child, query))
+      .filter(Boolean);
+    if (children.length === 0) return null;
+    return { ...node, children };
+  }
+
+  function setFilter(query) {
+    currentFilter = query;
+    if (currentData && containerEl) {
+      const activePath = activeItem ? activeItem.dataset.path : null;
+      render(containerEl, currentData);
+      if (activePath) setActivePath(activePath);
+    }
   }
 
   function sortTree(node) {
@@ -156,5 +183,5 @@ const Tree = (() => {
     return div.innerHTML;
   }
 
-  return { render, setCallback, setActivePath, setSort, getSort };
+  return { render, setCallback, setActivePath, setSort, getSort, setFilter };
 })();
