@@ -1,4 +1,5 @@
-const BASE = '';
+// Read BASE_PATH from window (injected by server.js)
+const BASE = window.__BASE_PATH__ || '';
 
 export async function fetchTree() {
   const res = await fetch(`${BASE}/api/tree`);
