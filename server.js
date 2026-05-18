@@ -35,7 +35,7 @@ let injectedHtml = null;
 try {
   const indexHtml = fs.readFileSync(indexHtmlPath, 'utf-8');
   injectedHtml = indexHtml
-    .replace('<meta charset="UTF-8">', `<meta charset="UTF-8">\n  <base href="${basePath}">\n  <script>window.__BASE_PATH__ = "${basePath}";</script>`);
+    .replace(/<meta charset="UTF-8"\s*\/?>/, `<meta charset="UTF-8" />\n  <base href="${basePath}">\n  <script>window.__BASE_PATH__ = "${basePath}";</script>`);
 } catch (err) {
   console.warn('Warning: dist/index.html not found. Build the frontend first for production.');
 }
