@@ -1,21 +1,27 @@
 const Tree = (() => {
   let activeItem = null;
   let onFileSelect = null;
+  let onDeleteFile = null;
   let currentData = null;
-  let currentSort = 'name'; // 'name' or 'time'
-  let currentDir = 'asc'; // 'asc' or 'desc'
+  let currentSort = 'name';
+  let currentDir = 'asc';
   let containerEl = null;
   let currentFilter = '';
 
   const ICONS = {
+    chevronRight: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+    chevronDown: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
     folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
-    folderOpen: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/><path d="M2 10h20l-2 9H4l-2-9z"/></svg>`,
     file: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>`,
-    chevron: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+    delete: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>`,
   };
 
   function setCallback(cb) {
     onFileSelect = cb;
+  }
+
+  function setDeleteCallback(cb) {
+    onDeleteFile = cb;
   }
 
   function setSort(sort, dir) {
@@ -109,15 +115,16 @@ const Tree = (() => {
 
     const row = document.createElement('div');
     row.className = 'tree-item';
-    row.innerHTML = `<span class="tree-item-icon">${ICONS.folder}</span><span class="tree-item-name">${escapeHtml(item.name)}</span>`;
+    row.innerHTML = `<span class="tree-item-chevron">${ICONS.chevronRight}</span><span class="tree-item-icon">${ICONS.folder}</span><span class="tree-item-name">${escapeHtml(item.name)}</span>`;
 
     const childrenDiv = document.createElement('div');
     childrenDiv.className = 'tree-dir-children';
     childrenDiv.appendChild(buildList(item.children));
 
-    row.addEventListener('click', () => {
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
       const collapsed = childrenDiv.classList.toggle('collapsed');
-      row.querySelector('.tree-item-icon').innerHTML = collapsed ? ICONS.folder : ICONS.folderOpen;
+      row.querySelector('.tree-item-chevron').innerHTML = collapsed ? ICONS.chevronRight : ICONS.chevronDown;
     });
 
     frag.appendChild(row);
@@ -135,11 +142,19 @@ const Tree = (() => {
       timeStr = `<span class="tree-item-time">${formatTime(item.mtime)}</span>`;
     }
 
-    row.innerHTML = `<span class="tree-item-icon">${ICONS.file}</span><span class="tree-item-name">${escapeHtml(item.name)}</span>${timeStr}`;
+    row.innerHTML = `<span class="tree-item-chevron invisible"></span><span class="tree-item-icon">${ICONS.file}</span><span class="tree-item-name">${escapeHtml(item.name)}</span>${timeStr}<button class="tree-item-delete" title="Delete file" data-path="${escapeHtml(item.path)}">${ICONS.delete}</button>`;
 
-    row.addEventListener('click', () => {
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
       setActive(row);
       if (onFileSelect) onFileSelect(item.path);
+    });
+
+    // Delete button click handler
+    const deleteBtn = row.querySelector('.tree-item-delete');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (onDeleteFile) onDeleteFile(item.path);
     });
 
     return row;
@@ -183,5 +198,5 @@ const Tree = (() => {
     return div.innerHTML;
   }
 
-  return { render, setCallback, setActivePath, setSort, getSort, setFilter };
+  return { render, setCallback, setDeleteCallback, setActivePath, setSort, getSort, setFilter };
 })();

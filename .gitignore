@@ -3,3 +3,4 @@ package-lock.json
 trash/*
 docs/*
 .env
+dist/

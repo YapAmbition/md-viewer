@@ -27,15 +27,28 @@ function requirePassword(req, res, next) {
 }
 
 // Serve index.html with BASE_PATH injected
-const indexHtml = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf-8');
-const injectedHtml = indexHtml
-  .replace('<meta charset="UTF-8">', `<meta charset="UTF-8">\n  <base href="${basePath}">\n  <script>window.__BASE_PATH__ = "${basePath}";</script>`);
+// Production: serve from dist/ (Vite build output)
+const distPath = path.join(__dirname, 'dist');
+const indexHtmlPath = path.join(distPath, 'index.html');
+
+let injectedHtml = null;
+try {
+  const indexHtml = fs.readFileSync(indexHtmlPath, 'utf-8');
+  injectedHtml = indexHtml
+    .replace('<meta charset="UTF-8">', `<meta charset="UTF-8">\n  <base href="${basePath}">\n  <script>window.__BASE_PATH__ = "${basePath}";</script>`);
+} catch (err) {
+  console.warn('Warning: dist/index.html not found. Build the frontend first for production.');
+}
 
 app.get('/', (req, res) => {
-  res.type('html').send(injectedHtml);
+  if (injectedHtml) {
+    res.type('html').send(injectedHtml);
+  } else {
+    res.status(500).send('Frontend not built. Run npm run build first.');
+  }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(distPath));
 
 app.get('/api/tree', (req, res) => {
   try {

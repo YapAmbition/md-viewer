@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const sidebar = document.getElementById('sidebar');
   const sidebarToggle = document.getElementById('sidebarToggle');
-  const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
   const sidebarOverlay = document.getElementById('sidebarOverlay');
   const fileTreeEl = document.getElementById('fileTree');
   const contentEl = document.getElementById('content');
@@ -15,6 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   Tree.setCallback((filePath) => {
     Viewer.loadFile(filePath);
     closeMobileSidebar();
+  });
+
+  Tree.setDeleteCallback((filePath) => {
+    openDeleteModal(filePath);
   });
 
   // Load file tree
@@ -69,17 +72,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     searchInput.focus();
   });
 
-  // Sidebar collapse (desktop)
-  sidebarCollapseBtn.addEventListener('click', () => {
-    sidebar.classList.add('collapsed');
-    document.body.classList.add('sidebar-collapsed');
-  });
-
-  // Sidebar toggle (mobile) / expand collapsed sidebar (desktop)
+  // Sidebar toggle: desktop toggle collapse, mobile toggle overlay
   sidebarToggle.addEventListener('click', () => {
-    if (window.innerWidth > 768 && sidebar.classList.contains('collapsed')) {
-      sidebar.classList.remove('collapsed');
-      document.body.classList.remove('sidebar-collapsed');
+    if (window.innerWidth > 768) {
+      sidebar.classList.toggle('collapsed');
+      document.body.classList.toggle('sidebar-collapsed');
     } else {
       sidebar.classList.toggle('open');
       sidebarOverlay.classList.toggle('visible');
@@ -254,11 +251,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   deleteModal.addEventListener('click', (e) => {
     if (e.target === deleteModal) closeDeleteModal();
   });
-
-  // Expose delete handler for Viewer
-  window._onDeleteFile = (filePath) => {
-    openDeleteModal(filePath);
-  };
 
   deleteSubmitBtn.addEventListener('click', async () => {
     if (!deletePassword.value) {

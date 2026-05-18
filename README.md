@@ -19,10 +19,16 @@
 
 ```bash
 npm install
+
+# 开发模式（同时启动前端热更新和后端服务，一个命令即可）
+npm run dev
+
+# 生产模式（先构建前端，再启动服务）
+npm run build
 npm start
 ```
 
-浏览器访问 `http://localhost:3000`。
+开发模式下浏览器访问 `http://localhost:5173`（Vite 热更新），生产模式访问 `http://localhost:4000`（或配置的端口）。
 
 ## 配置
 
@@ -78,19 +84,56 @@ location /md-view/ {
 sudo nginx -s reload
 ```
 
+## PM2 进程管理
+
+生产环境推荐使用 PM2 管理服务：
+
+```bash
+# 1. 先构建前端
+npm run build
+
+# 2. 启动服务
+pm2 start server.js --name md-viewer
+
+# 常用命令
+pm2 status              # 查看状态
+pm2 logs md-viewer      # 查看日志
+pm2 restart md-viewer   # 重启服务
+pm2 stop md-viewer      # 停止服务
+pm2 delete md-viewer    # 删除进程
+```
+
+更新代码后重新部署：
+
+```bash
+git pull
+npm install
+npm run build
+pm2 restart md-viewer
+```
+
 ## 项目结构
 
 ```
-├── server.js              # Express 服务入口
+├── server.js              # Express 服务入口（生产模式提供 API + 静态文件）
 ├── src/
 │   ├── config.js          # 配置（端口、目录、基础路径）
 │   └── fileService.js     # 文件扫描 + 安全校验
-├── public/
-│   ├── index.html         # 前端页面
-│   ├── css/style.css      # 样式（Animal Island 主题）
-│   └── js/
-│       ├── app.js         # 主逻辑 + 路由
-│       ├── tree.js        # 文件树组件
-│       └── viewer.js      # Markdown 渲染
+├── frontend/              # React 前端项目（Vite + React）
+│   ├── src/
+│   │   ├── main.jsx       # 入口文件
+│   │   ├── App.jsx        # 根组件
+│   │   ├── index.css      # 样式（Animal Island 主题）
+│   │   ├── api.js         # API 调用封装
+│   │   └── components/    # React 组件
+│   │       ├── Topbar.jsx
+│   │       ├── Sidebar.jsx
+│   │       ├── FileTree.jsx
+│   │       ├── MarkdownViewer.jsx
+│   │       ├── UploadModal.jsx
+│   │       └── DeleteModal.jsx
+│   ├── vite.config.js     # Vite 配置（API 代理 + 构建输出）
+│   └── index.html
+├── dist/                  # 生产构建输出（npm run build 后生成）
 └── docs/                  # 默认 Markdown 文件目录
 ```

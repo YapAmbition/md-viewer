@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "dev": "concurrently \"node server.js\" \"cd frontend && npm run dev\"",
+    "build": "cd frontend && npm run build",
+    "start": "node server.js",
+    "preview": "cd frontend && npm run preview"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +16,8 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "multer": "^2.1.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
