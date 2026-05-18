@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { Modal, Button, Input, Card, Typewriter } from 'animal-island-ui';
 import { uploadFile } from '../api';
 
 export default function UploadModal({ open, onClose, onSuccess }) {
@@ -71,54 +72,62 @@ export default function UploadModal({ open, onClose, onSuccess }) {
     }
   };
 
-  if (!open) return null;
-
   return (
-    <div className="modal-overlay visible" onClick={(e) => e.target === e.currentTarget && handleClose()}>
-      <div className="modal">
-        <div className="modal-header">
-          <h3 className="modal-title">Upload Markdown File</h3>
-          <button className="modal-close" onClick={handleClose}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <Modal
+      open={open}
+      title="Upload Markdown File"
+      onClose={handleClose}
+      onOk={handleSubmit}
+      typewriter
+      typeSpeed={20}
+      width={480}
+      footer={
+        <>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button type="primary" onClick={handleSubmit} disabled={submitting || !selectedFile || !password}>
+            Upload
+          </Button>
+        </>
+      }
+    >
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>File</div>
+          <Card
+            type="dashed"
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) handleFileSelect(e.dataTransfer.files[0]); }}
+            style={{ cursor: 'pointer', textAlign: 'center', padding: '18px 16px' }}
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
-          </button>
+            <p style={{ margin: '6px 0 0', fontSize: 13 }}>Click or drag .md file here</p>
+            {selectedFile && <p style={{ margin: '8px 0 0', fontSize: 14, fontWeight: 700 }}>{selectedFile.name}</p>}
+            <input type="file" ref={fileInputRef} accept=".md,.markdown" hidden onChange={(e) => e.target.files[0] && handleFileSelect(e.target.files[0])} />
+          </Card>
         </div>
-        <div className="modal-body">
-          <div className="form-group">
-            <label className="form-label">File</label>
-            <div
-              className={`file-drop-zone${selectedFile ? ' has-file' : ''}${dragOver ? ' dragover' : ''}`}
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) handleFileSelect(e.dataTransfer.files[0]); }}
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              <p className="file-drop-text">Click or drag .md file here</p>
-              {selectedFile && <p className="file-drop-name">{selectedFile.name}</p>}
-              <input type="file" ref={fileInputRef} accept=".md,.markdown" hidden onChange={(e) => e.target.files[0] && handleFileSelect(e.target.files[0])} />
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Directory (optional)</label>
-            <input type="text" className="form-input" placeholder="e.g. notes/2024" value={directory} onChange={(e) => setDirectory(e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Password</label>
-            <input type="password" className="form-input" placeholder="Enter upload password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          {message && <div className={`form-message ${messageType}`}>{message}</div>}
+
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>Directory (optional)</div>
+          <Input placeholder="e.g. notes/2024" value={directory} onChange={(e) => setDirectory(e.target.value)} />
         </div>
-        <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={handleClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>Upload</button>
+
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>Password</div>
+          <Input type="password" placeholder="Enter upload password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
+
+        {message && (
+          <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: messageType === 'error' ? '#e05a5a' : messageType === 'success' ? '#19c8b9' : '#9f927d' }}>
+            {message}
+          </p>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }

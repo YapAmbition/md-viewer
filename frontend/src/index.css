@@ -58,11 +58,6 @@ body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   letter-spacing: 0.01em;
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Ccircle cx='8' cy='8' r='4' fill='%2319c8b9'/%3E%3C/svg%3E") 8 8, default;
-}
-
-a, button, [role="button"], input[type="submit"], input[type="button"] {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='5' fill='%2319c8b9' stroke='%2311a89b' stroke-width='2'/%3E%3C/svg%3E") 10 10, pointer;
 }
 
 /* ===== Top Bar ===== */

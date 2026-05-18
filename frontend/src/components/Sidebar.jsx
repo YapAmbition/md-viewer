@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Input, Button } from 'animal-island-ui';
 import FileTree from './FileTree';
 
 const ICONS = {
@@ -19,8 +20,6 @@ export default function Sidebar({
   onSearchChange,
   onOverlayClick,
 }) {
-  const [searchFocused, setSearchFocused] = useState(false);
-
   const handleSortClick = (field) => {
     if (sort.sort === field) {
       onSortChange(field, sort.dir === 'asc' ? 'desc' : 'asc');
@@ -35,50 +34,28 @@ export default function Sidebar({
         <span className="sidebar-label">Documents</span>
       </div>
       <div className="sidebar-toolbar">
-        <div className="search-box">
-          <svg className="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search files..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-          />
-          {searchQuery && (
-            <button className="search-clear visible" onClick={() => onSearchChange('')} title="Clear">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          )}
-        </div>
+        <Input
+          placeholder="Search files..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          allowClear
+          size="small"
+        />
         <div className="sort-controls">
-          <button
-            className={`sort-btn${sort.sort === 'name' ? ' active' : ''}`}
+          <Button
+            type={sort.sort === 'name' ? 'primary' : 'default'}
+            size="small"
             onClick={() => handleSortClick('name')}
-            title="Sort by name"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M3 6h12M3 12h9M3 18h6"/>
-            </svg>
-            <span>Name</span>
-            <span className="sort-arrow">{sort.sort === 'name' ? (sort.dir === 'asc' ? '↑' : '↓') : ''}</span>
-          </button>
-          <button
-            className={`sort-btn${sort.sort === 'time' ? ' active' : ''}`}
+            Name {sort.sort === 'name' ? (sort.dir === 'asc' ? '↑' : '↓') : ''}
+          </Button>
+          <Button
+            type={sort.sort === 'time' ? 'primary' : 'default'}
+            size="small"
             onClick={() => handleSortClick('time')}
-            title="Sort by time"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-            <span>Time</span>
-            <span className="sort-arrow">{sort.sort === 'time' ? (sort.dir === 'asc' ? '↑' : '↓') : ''}</span>
-          </button>
+            Time {sort.sort === 'time' ? (sort.dir === 'asc' ? '↑' : '↓') : ''}
+          </Button>
         </div>
       </div>
       <nav className="file-tree">

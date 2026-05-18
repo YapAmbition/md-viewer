@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Cursor } from 'animal-island-ui';
 import Topbar from './components/Topbar';
 import Sidebar from './components/Sidebar';
 import MarkdownViewer from './components/MarkdownViewer';
@@ -88,39 +89,41 @@ function App() {
   }, [sidebarCollapsed]);
 
   return (
-    <div className="app">
-      <Topbar onToggle={handleSidebarToggle} onUpload={() => setUploadOpen(true)} />
-      <div className="layout">
-        <Sidebar
-          collapsed={sidebarCollapsed}
-          mobileOpen={mobileOpen}
-          treeData={treeData}
-          sort={sort}
-          searchQuery={searchQuery}
-          currentFile={currentFile}
-          onFileSelect={handleFileSelect}
-          onDelete={handleDeleteRequest}
-          onSortChange={handleSortChange}
-          onSearchChange={setSearchQuery}
-          onOverlayClick={() => setMobileOpen(false)}
+    <Cursor>
+      <div className="app">
+        <Topbar onToggle={handleSidebarToggle} onUpload={() => setUploadOpen(true)} />
+        <div className="layout">
+          <Sidebar
+            collapsed={sidebarCollapsed}
+            mobileOpen={mobileOpen}
+            treeData={treeData}
+            sort={sort}
+            searchQuery={searchQuery}
+            currentFile={currentFile}
+            onFileSelect={handleFileSelect}
+            onDelete={handleDeleteRequest}
+            onSortChange={handleSortChange}
+            onSearchChange={setSearchQuery}
+            onOverlayClick={() => setMobileOpen(false)}
+          />
+          <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />
+          <main className="content">
+            <MarkdownViewer filePath={currentFile} />
+          </main>
+        </div>
+        <UploadModal
+          open={uploadOpen}
+          onClose={() => setUploadOpen(false)}
+          onSuccess={handleUploadSuccess}
         />
-        <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />
-        <main className="content">
-          <MarkdownViewer filePath={currentFile} />
-        </main>
+        <DeleteModal
+          open={deleteOpen}
+          filePath={deleteTarget}
+          onClose={() => { setDeleteOpen(false); setDeleteTarget(null); }}
+          onSuccess={handleDeleteSuccess}
+        />
       </div>
-      <UploadModal
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        onSuccess={handleUploadSuccess}
-      />
-      <DeleteModal
-        open={deleteOpen}
-        filePath={deleteTarget}
-        onClose={() => { setDeleteOpen(false); setDeleteTarget(null); }}
-        onSuccess={handleDeleteSuccess}
-      />
-    </div>
+    </Cursor>
   );
 }
 
