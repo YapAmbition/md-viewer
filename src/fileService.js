@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { markdownDir } = require('./config');
+const { markdownDir, trashDir } = require('./config');
 
 const MD_EXTENSIONS = new Set(['.md', '.markdown']);
 
@@ -81,4 +81,75 @@ function readFile(relativePath) {
   };
 }
 
-module.exports = { getTree, readFile };
+function uploadFile(filename, buffer, subDir) {
+  if (!isMarkdownFile(filename)) {
+    return { error: 'Only .md or .markdown files are allowed' };
+  }
+
+  // Sanitize filename
+  const safeName = path.basename(filename);
+  if (isHidden(safeName)) {
+    return { error: 'Hidden files are not allowed' };
+  }
+
+  let targetDir = markdownDir;
+  if (subDir) {
+    const normalizedSub = path.normalize(subDir);
+    if (normalizedSub.startsWith('..') || path.isAbsolute(normalizedSub)) {
+      return { error: 'Invalid directory path' };
+    }
+    targetDir = path.resolve(markdownDir, normalizedSub);
+    if (!targetDir.startsWith(markdownDir)) {
+      return { error: 'Invalid directory path' };
+    }
+  }
+
+  // Create directory if it doesn't exist
+  if (!fs.existsSync(targetDir)) {
+    fs.mkdirSync(targetDir, { recursive: true });
+  }
+
+  const fullPath = path.join(targetDir, safeName);
+  fs.writeFileSync(fullPath, buffer);
+
+  const relativePath = path.relative(markdownDir, fullPath);
+  return { success: true, path: relativePath, filename: safeName };
+}
+
+function softDeleteFile(relativePath) {
+  const normalized = path.normalize(relativePath);
+  if (normalized.startsWith('..') || path.isAbsolute(normalized)) {
+    return { error: 'Invalid file path' };
+  }
+
+  const fullPath = path.resolve(markdownDir, normalized);
+  if (!fullPath.startsWith(markdownDir)) {
+    return { error: 'Invalid file path' };
+  }
+
+  if (!fs.existsSync(fullPath) || !fs.statSync(fullPath).isFile()) {
+    return { error: 'File not found' };
+  }
+
+  // Preserve directory structure in trash
+  const relDir = path.dirname(normalized);
+  const trashTarget = path.join(trashDir, relDir);
+  if (!fs.existsSync(trashTarget)) {
+    fs.mkdirSync(trashTarget, { recursive: true });
+  }
+
+  // If same filename exists in trash, append timestamp
+  let destName = path.basename(fullPath);
+  let destPath = path.join(trashTarget, destName);
+  if (fs.existsSync(destPath)) {
+    const ext = path.extname(destName);
+    const base = path.basename(destName, ext);
+    destName = `${base}_${Date.now()}${ext}`;
+    destPath = path.join(trashTarget, destName);
+  }
+
+  fs.renameSync(fullPath, destPath);
+  return { success: true };
+}
+
+module.exports = { getTree, readFile, uploadFile, softDeleteFile };
