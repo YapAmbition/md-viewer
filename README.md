@@ -20,6 +20,9 @@
 ```bash
 npm install
 
+# 安装前端依赖（首次部署或克隆后必须执行）
+cd frontend && npm install && cd ..
+
 # 开发模式（同时启动前端热更新和后端服务，一个命令即可）
 npm run dev
 
