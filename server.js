@@ -29,7 +29,7 @@ function requirePassword(req, res, next) {
 // Serve index.html with BASE_PATH injected
 const indexHtml = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf-8');
 const injectedHtml = indexHtml
-  .replace('</head>', `  <base href="${basePath}">\n  <script>window.__BASE_PATH__ = "${basePath}";</script>\n</head>`);
+  .replace('<meta charset="UTF-8">', `<meta charset="UTF-8">\n  <base href="${basePath}">\n  <script>window.__BASE_PATH__ = "${basePath}";</script>`);
 
 app.get('/', (req, res) => {
   res.type('html').send(injectedHtml);
