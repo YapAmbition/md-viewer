@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load file tree
   try {
-    const res = await fetch('/api/tree');
+    const res = await fetch('api/tree');
     const treeData = await res.json();
     Tree.render(fileTreeEl, treeData);
   } catch (err) {

@@ -18,7 +18,7 @@ const Viewer = (() => {
 
   async function loadFile(filePath) {
     try {
-      const res = await fetch(`/api/file?path=${encodeURIComponent(filePath)}`);
+      const res = await fetch(`api/file?path=${encodeURIComponent(filePath)}`);
       if (!res.ok) {
         showError('File not found or cannot be read.');
         return;
