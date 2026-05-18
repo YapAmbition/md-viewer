@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Cursor } from 'animal-island-ui';
+import { Cursor, Loading } from 'animal-island-ui';
 import Topbar from './components/Topbar';
 import Sidebar from './components/Sidebar';
 import MarkdownViewer from './components/MarkdownViewer';
@@ -11,6 +11,7 @@ function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [treeData, setTreeData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [currentFile, setCurrentFile] = useState(null);
   const [sort, setSort] = useState({ sort: 'name', dir: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,11 +21,20 @@ function App() {
 
   // Load tree
   const refreshTree = useCallback(async () => {
+    const startTime = Date.now();
     try {
+      setLoading(true);
       const data = await fetchTree();
       setTreeData(data);
     } catch (err) {
       console.error('Failed to load tree:', err);
+    } finally {
+      // Ensure loading shows for at least 500ms
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 500) {
+        await new Promise(resolve => setTimeout(resolve, 500 - elapsed));
+      }
+      setLoading(false);
     }
   }, []);
 
@@ -123,6 +133,18 @@ function App() {
           onSuccess={handleDeleteSuccess}
         />
       </div>
+      <Loading
+        active={loading}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 9999,
+          background: 'rgba(255, 255, 255, 0.9)',
+        }}
+      />
     </Cursor>
   );
 }
